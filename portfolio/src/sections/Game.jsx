@@ -19,10 +19,9 @@ const Game = () => {
   // Game settings
   const gridSize = 20;
   
-  // We use refs to hold game state that changes rapidly, to avoid re-renders
   const snakeRef = useRef([{ x: 10, y: 10 }]);
   const foodRef = useRef({ x: 15, y: 15 });
-  const directionRef = useRef({ x: 0, y: -1 }); // Start moving up
+  const directionRef = useRef({ x: 0, y: -1 });
   const gameLoopRef = useRef(null);
 
   const generateFood = (canvas) => {
@@ -42,6 +41,14 @@ const Game = () => {
     setGameStarted(true);
   };
 
+  // --- NEW: Function to handle virtual button presses ---
+  const handleDirectionChange = (newDirection) => {
+    // Prevent the snake from reversing on itself
+    if (directionRef.current.x !== -newDirection.x || directionRef.current.y !== -newDirection.y) {
+      directionRef.current = newDirection;
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!gameStarted) return;
@@ -55,11 +62,7 @@ const Game = () => {
 
       if (keyMap[e.key]) {
         e.preventDefault();
-        const newDirection = keyMap[e.key];
-        // Prevent the snake from reversing on itself
-        if (directionRef.current.x !== -newDirection.x || directionRef.current.y !== -newDirection.y) {
-          directionRef.current = newDirection;
-        }
+        handleDirectionChange(keyMap[e.key]);
       }
     };
 
@@ -79,18 +82,15 @@ const Game = () => {
         return;
       }
 
-      // Move snake
       const head = { ...snakeRef.current[0] };
       head.x += directionRef.current.x;
       head.y += directionRef.current.y;
 
-      // Check for collision with walls
       if (head.x < 0 || head.x >= canvas.width / gridSize || head.y < 0 || head.y >= canvas.height / gridSize) {
         setIsGameOver(true);
         return;
       }
 
-      // Check for collision with self
       for (let i = 1; i < snakeRef.current.length; i++) {
         if (head.x === snakeRef.current[i].x && head.y === snakeRef.current[i].y) {
           setIsGameOver(true);
@@ -100,7 +100,6 @@ const Game = () => {
 
       snakeRef.current.unshift(head);
 
-      // Check for collision with food
       if (head.x === foodRef.current.x && head.y === foodRef.current.y) {
         setScore(prev => prev + 10);
         generateFood(canvas);
@@ -108,15 +107,10 @@ const Game = () => {
         snakeRef.current.pop();
       }
 
-      // Draw everything
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw food
-      ctx.fillStyle = '#ef4444'; // Red for food
+      ctx.fillStyle = '#ef4444';
       ctx.fillRect(foodRef.current.x * gridSize, foodRef.current.y * gridSize, gridSize, gridSize);
-
-      // Draw snake
-      ctx.fillStyle = '#0ea5e9'; // Blueprint blue for snake
+      ctx.fillStyle = '#0ea5e9';
       snakeRef.current.forEach(segment => {
         ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
       });
@@ -139,14 +133,14 @@ const Game = () => {
         </motion.h2>
         <motion.div variants={fadeInUp} className="w-24 h-1 bg-sky-500 mx-auto mb-8"></motion.div>
         <motion.p variants={fadeInUp} className="text-lg text-gray-600 mb-8">
-          Fancy a quick game? Use the arrow keys to play.
+          Fancy a quick game? Use the arrow keys on desktop or the virtual controls on mobile.
         </motion.p>
         
         <motion.div variants={fadeInUp} className="relative aspect-video bg-gray-50 border-2 border-gray-200 rounded-lg shadow-inner overflow-hidden">
           <canvas
             ref={canvasRef}
             width={600}
-            height={338} // Maintain a 16:9 aspect ratio
+            height={338}
             className="w-full h-full"
           />
           {!gameStarted && (
@@ -166,8 +160,20 @@ const Game = () => {
             </div>
           )}
         </motion.div>
-        <div className="mt-4 flex justify-between items-center font-semibold text-gray-700">
-            <p>Score: <span className="text-2xl font-bold text-sky-600">{score}</span></p>
+        <div className="mt-6 flex justify-between items-center font-semibold text-gray-700">
+            <p className="text-lg">Score: <span className="text-2xl font-bold text-sky-600">{score}</span></p>
+            
+            {/* --- NEW: VIRTUAL D-PAD FOR MOBILE --- */}
+            {/* This block is hidden on medium screens and up (`md:hidden`) */}
+            <div className="grid grid-cols-3 gap-2 md:hidden">
+                <div></div>
+                <button onClick={() => handleDirectionChange({x: 0, y: -1})} className="bg-gray-200 rounded-md p-3 active:bg-sky-200"><ArrowUp /></button>
+                <div></div>
+                <button onClick={() => handleDirectionChange({x: -1, y: 0})} className="bg-gray-200 rounded-md p-3 active:bg-sky-200"><ArrowLeft /></button>
+                <button onClick={() => handleDirectionChange({x: 0, y: 1})} className="bg-gray-200 rounded-md p-3 active:bg-sky-200"><ArrowDown /></button>
+                <button onClick={() => handleDirectionChange({x: 1, y: 0})} className="bg-gray-200 rounded-md p-3 active:bg-sky-200"><ArrowRight /></button>
+            </div>
+
             <div className="hidden md:flex items-center gap-2 text-gray-500">
                 <span>Controls:</span>
                 <div className="flex gap-1">
