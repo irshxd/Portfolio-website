@@ -37,12 +37,12 @@ const Header = ({ onResumeOpen }) => {
                                     {link}
                                 </button>
                             ))}
-                            {/* --- RESUME BUTTON ADDED BACK --- */}
-                            <button 
+                         
+                           <button 
                                 onClick={onResumeOpen} 
-                                className="flex items-center gap-2 text-lg font-semibold text-gray-600 bg-gray-100 px-4 py-2 rounded-lg hover:bg-sky-100 hover:text-sky-600 transition-colors"
+                                className="flex items-center gap-2 text-gray-600 font-semibold bg-gray-100 px-4 py-2 rounded-lg hover:bg-sky-100 hover:text-sky-600 transition-colors"
                             >
-                                <FileText size={18} /> Resume
+                                <FileText size={16} /> Resume
                             </button>
                         </nav>
                         <div className="md:hidden">
@@ -62,7 +62,9 @@ const Header = ({ onResumeOpen }) => {
                                 {link}
                             </button>
                         ))}
-                         
+                          <button onClick={onResumeOpen} className="text-gray-700 hover:text-sky-500 w-full py-2 transition-colors font-semibold">
+                            View Resume
+                        </button>
                       
                     </div>
                 </motion.div>
