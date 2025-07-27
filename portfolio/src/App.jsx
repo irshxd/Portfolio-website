@@ -1,6 +1,6 @@
-// src/App.jsx
-import React from 'react';
 
+import React, { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 // Import all your section components
 import Header from './sections/Header';
 import Hero from './sections/Hero';
@@ -11,8 +11,11 @@ import Experience from './sections/Experience';
 import Contact from './sections/Contact';
 import Game from './sections/Game';
 import Footer from './sections/Footer';
+import ResumeModal from './components/ResumeModal'; 
 
 export default function App() {
+
+    const [isResumeOpen, setIsResumeOpen] = useState(false);
   return (
     <>
       <style>{`
@@ -38,6 +41,7 @@ export default function App() {
         <div className="blueprint-bg"></div>
         <div className="relative z-10">
           <Header />
+           <Header onResumeOpen={() => setIsResumeOpen(true)} />
           <main>
             <Hero />
             <About />
@@ -50,6 +54,9 @@ export default function App() {
           </main>
           <Footer />
         </div>
+        <AnimatePresence>
+          {isResumeOpen && <ResumeModal onClose={() => setIsResumeOpen(false)} />}
+        </AnimatePresence>
       </div>
     </>
   );
